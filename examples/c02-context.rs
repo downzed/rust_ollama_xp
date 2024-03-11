@@ -3,6 +3,7 @@ use ollama_rs::generation::completion::request::GenerationRequest;
 use ollama_rs::generation::completion::GenerationContext;
 use ollama_rs::Ollama;
 
+use simple_fs::{ensure_file_dir, save_json};
 use xp_ollama::consts::MODEL;
 use xp_ollama::{generator, Result};
 
@@ -30,6 +31,11 @@ async fn main() -> Result<()> {
 
         if let Some(final_data) = final_data {
             last_ctx = Some(final_data.context);
+
+            // save for debug
+            let ctx_file_path = ".c02-data/ctx.json";
+            ensure_file_dir(ctx_file_path)?;
+            save_json(ctx_file_path, &last_ctx)?;
         }
     }
 
