@@ -1,4 +1,5 @@
 use futures::StreamExt;
+use ollama_rs::generation::chat::request::ChatMessageRequest;
 use ollama_rs::generation::completion::request::GenerationRequest;
 use ollama_rs::generation::completion::GenerationFinalResponseData;
 use ollama_rs::Ollama;
@@ -9,18 +10,19 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub type Error = Box<dyn std::error::Error>; // For early development
 
 pub mod consts {
-    pub const MODEL: &str = "llama2:latest";
-    // pub const MODEL: &str = "codellama:latest";
+    // pub const MODEL: &str = "llama2:latest";
+    pub const EMBEDDING_MODEL: &str = "nomic-embed-text";
+    pub const MODEL: &str = "codellama:latest";
     pub const DEFAULT_SYSTEM_MOCK: &str = r#"
+        Your name is Steve!.
         You are a helpful, supportive, mastermind, superior and intelligent assistant.
         Always be concise and specific, and keep it real, and short.
         You are an expert programmer and architect that writes simple, concise code and explanations (if needed).
+
     "#;
 }
 
 pub mod generator {
-
-    use ollama_rs::generation::chat::request::ChatMessageRequest;
 
     use super::*;
 
@@ -73,13 +75,14 @@ pub mod generator {
         let mut char_count = 0;
         let mut current_asst_msg_elems: Vec<String> = Vec::new();
 
+        println!("\nSteve >>");
         while let Some(res) = stream.next().await {
             let res = res.map_err(|_| "stream.next error")?;
             if let Some(msg) = res.message {
                 let content = msg.content;
                 char_count += content.len();
-                if char_count > 55 {
-                    stdout.write_all(b"\n").await?;
+                if char_count > 120 {
+                    stdout.write_all(b"").await?;
                     char_count = 0;
                 }
                 // Write output

@@ -20,8 +20,7 @@ async fn main() -> Result<()> {
     let mut last_ctx: Option<GenerationContext> = None;
     for p in prompts {
         println!("\n [Q]: {}", p);
-        let mut gen_req = GenerationRequest::new(MODEL.to_string(), p.to_string())
-            .system("Aanswer like Dr Seuss and Snoop Dogg.".to_string());
+        let mut gen_req = GenerationRequest::new(MODEL.to_string(), p.to_string());
 
         if let Some(last_ctx) = last_ctx.take() {
             gen_req = gen_req.context(last_ctx);

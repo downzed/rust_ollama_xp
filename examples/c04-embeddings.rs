@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 
 use simple_fs::{ensure_dir, read_to_string, save_be_f64, save_json};
-use xp_ollama::{consts::MODEL, Result};
+use xp_ollama::{consts::EMBEDDING_MODEL, Result};
 
 use ollama_rs::Ollama;
 
@@ -16,7 +16,7 @@ async fn main() -> Result<()> {
     let txt = read_to_string(Path::new(MOCK_DIR).join("embeddings.txt"))?;
 
     // Splits
-    let splits = simple_text_splitter(&txt, 550)?;
+    let splits = simple_text_splitter(&txt, 500)?;
 
     println!(">> [debug: splits counts] {}", splits.len());
 
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
         println!(">> [debug: text length] {}", txt.len());
 
         let res = ollama
-            .generate_embeddings(MODEL.to_string(), seg, None)
+            .generate_embeddings(EMBEDDING_MODEL.to_string(), seg, None)
             .await?;
 
         println!(">> [debug: embeddings size] {}", res.embeddings.len());
