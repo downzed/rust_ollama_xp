@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     print_ascii();
 
     println!();
-    println!("Ask away >> ");
+    println!("So.. what do you want to ask?\n");
 
     while let Some(line) = lines.next_line().await? {
         stdout.flush().await?;
@@ -55,7 +55,9 @@ async fn main() -> Result<()> {
             thread_messages.push(asst_msg);
         }
         println!();
-        println!("Ask away >> ");
+        println!("So.. what do you want to ask?\n");
+
+        stdout.flush().await?;
     }
     Ok(())
 }
