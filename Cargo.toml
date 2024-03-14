@@ -3,6 +3,10 @@ name = "xp-ollama"
 version = "0.1.0"
 edition = "2021"
 
+# development settings
+[lint.rust]
+unsafe_code = "forbid"
+unused = "allow"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

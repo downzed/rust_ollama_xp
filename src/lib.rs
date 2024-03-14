@@ -20,6 +20,23 @@ pub mod consts {
         You are an expert programmer and architect that writes simple, concise code and explanations (if needed).
 
     "#;
+
+    pub const SCHEMA: &str = r#"
+        {
+            "city": {
+                "type": "string",
+                "description": "The name of the city."
+            },
+            "lat": {
+                "type": "float",
+                "description": "Decimal latitude of the city."
+            },
+            "long": {
+                "type": "float",
+                "description": "Decimal longitude of the city."
+            }
+        }
+    "#;
 }
 
 pub mod generator {

@@ -21,11 +21,10 @@ async fn main() -> Result<()> {
     // Convert the iterator to an asynchronous stream
     let stdin = tokio_io::stdin();
     let mut stdout = tokio_io::stdout();
-
-    let mut thread_messages: Vec<ChatMessage> = vec![system_msg];
-
     let reader = BufReader::new(stdin);
     let mut lines = reader.lines();
+
+    let mut thread_messages: Vec<ChatMessage> = vec![system_msg];
 
     print_ascii();
 
