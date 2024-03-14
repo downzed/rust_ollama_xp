@@ -21,6 +21,62 @@ pub mod consts {
 
     "#;
 
+    pub const MATH_ASST_SCHEMA: &str = r#"
+       {
+            "type": "function",
+            "parameters": {
+                "function_name": {
+                    "type": "string",
+                    "description": "The name of the function.",
+                },
+            },
+       } 
+    "#;
+
+    pub const SUB_FUNC_SCHEMA: &str = r#"
+        {
+            "type": "function",
+            "description": "Subtracts two numbers.",
+            "parameters": {
+                "a": {
+                    "type": "number",        
+                    "description": "The first number param."
+                },
+                "b": {
+                    "type": "number",        
+                    "description": "The second number param."
+                }
+
+            },
+            "returns": {
+                "type": "number",
+                "description": "The difference of the two numbers."
+            }
+        }
+    "#;
+
+    pub const SUM_FUNC_SCHEMA: &str = r#"
+        {
+            "type": "function",
+            "description": "Sums two numbers.",
+            "parameters": {
+                "a": {
+                    "type": "number",        
+                    "description": "The first number param."
+                },
+                "b": {
+                    "type": "number",        
+                    "description": "The second number param."
+                }
+
+            },
+            "returns": {
+                "type": "number",
+                "description": "The sum of the two numbers."
+            }
+        }
+    "#;
+
     pub const SCHEMA: &str = r#"
         {
             "city": {

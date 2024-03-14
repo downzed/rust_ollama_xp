@@ -1,12 +1,8 @@
-// region: -- modules
-
 use ollama_rs::generation::completion::request::GenerationRequest;
 use ollama_rs::Ollama;
 
 use xp_ollama::consts::{DEFAULT_SYSTEM_MOCK, MODEL};
 use xp_ollama::{generator, Result};
-
-// end region: -- modules
 
 #[tokio::main]
 async fn main() -> Result<()> {
