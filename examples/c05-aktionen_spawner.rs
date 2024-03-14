@@ -1,21 +1,19 @@
-use std::fmt::Debug;
+use std::process;
 
 use futures::StreamExt as _;
 use ollama_rs::{
     generation::{
         chat::{request::ChatMessageRequest, ChatMessage, ChatMessageResponseStream},
-        completion::{
-            request::GenerationRequest, GenerationContext, GenerationResponse,
-            GenerationResponseStream,
-        },
+        completion::request::GenerationRequest,
         options::GenerationOptions,
+        parameters::FormatType,
     },
     Ollama,
 };
 use tokio::{fs::File, io::AsyncWriteExt}; // Import for async read
 
 use xp_ollama::{
-    consts::{MODEL, SCHEMA},
+    consts::{FUNC_SCHEMA, MATH_ASST_SCHEMA, MODEL, SCHEMA, SUB_FUNC_SCHEMA, SUM_FUNC_SCHEMA},
     Result,
 };
 
@@ -40,6 +38,14 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+fn sum(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+fn sub(a: i32, b: i32) -> i32 {
+    a - b
+}
+
 async fn basic_prompt(ollama: &Ollama) -> Result<()> {
     let mut stdout = tokio::io::stdout();
 
@@ -52,20 +58,30 @@ async fn basic_prompt(ollama: &Ollama) -> Result<()> {
     std::io::stdin().read_line(&mut input)?;
 
     let prompt = input.trim_end().to_string();
-    let options = GenerationOptions::default()
-        .temperature(0.2)
-        .repeat_penalty(1.5)
-        .top_k(25)
-        .top_p(0.25);
+    let options = GenerationOptions::default().temperature(0.2);
+    // .repeat_penalty(1.5)
+    // .top_k(25)
+    // .top_p(0.25);
+
+    let mut messages = vec![ChatMessage::user(prompt.clone())];
+
+    // let system_message = ChatMessage::system();
+    // messages.push(system_message);
 
     let res = ollama
-        .generate(GenerationRequest::new(model, prompt).options(options))
+        .send_chat_messages(
+            ChatMessageRequest::new(model, messages)
+                .format(FormatType::Json)
+                .options(options),
+        )
         .await;
 
     if let Ok(res) = res {
-        println!("<<<< {}", res.response);
+        let response = res.message.unwrap().content;
+        let json: serde_json::Value = serde_json::from_str(&response).unwrap();
+        println!("<< {:#?}", json);
     }
-    Ok(())
+    process::exit(0);
 }
 
 async fn async_chat(ollama: &Ollama) -> Result<()> {
@@ -74,40 +90,71 @@ async fn async_chat(ollama: &Ollama) -> Result<()> {
 
     let mut messages: Vec<ChatMessage> = vec![];
 
-    const MODELFILE_SCHEMA: &str = r#"
-        FROM llama2
+    // const MODELFILE_SCHEMA: &str = r#"
+    //     FROM llama2
 
-        # set the temperature to 1 [higher is more creative, lower is more coherent]
-        PARAMETER temperature random_temperature
+    //     # set the temperature to 1 [higher is more creative, lower is more coherent]
+    //     PARAMETER temperature random_temperature
 
-        # set the system message
-        SYSTEM """
-        You are {name}. Answer as {name}, the assistant, only.
-        """
-    "#;
+    //     # set the system message
+    //     SYSTEM """
+    //     You are {name}. Answer as {name}, the assistant, only.
+    //     """
+    // "#;
 
-    let aktion_system_mock: String = format!(
+    // let aktion_system_mock: String = format!(
+    //     "
+    //     You are a helpful AI assistant!.\n
+    //     The user will enter a name and the assistant will create a Modelfile structure\n
+    //     Replace random_temperature with a number between 0.0 and 1.\n
+    //     Output should be in Modelfile text document using the schema defined here: {}.\n
+    //     Just print the Modelfile and nothing else.\n
+    // ",
+    //     MODELFILE_SCHEMA
+    // );
+
+    let aktion_math_asst: String = format!(
         "
         You are a helpful AI assistant!.\n
-        The user will enter a name and the assistant will create a Modelfile structure\n
-        Replace random_temperature with a number between 0.0 and 1.\n
-        Output should be in Modelfile text document using the schema defined here: {}.\n
-        Just print the Modelfile and nothing else.\n
+        Output should be in JSON using the schema defined here: {}.\n
+        Just print the JSON and nothing else.\n
+        Print JSON code block please.
     ",
-        MODELFILE_SCHEMA
+        MATH_ASST_SCHEMA
     );
 
-    // let aktion_system_mock: String = format!("
-    //     You are a helpful AI assistant!.\n
-    //     The user will enter a country name and assistant will return the decimal latitude and longitude of the capital of the country.\n
-    //     Output should be in JSON using the schema defined here: {}.\n
-    //     Just print the JSON and nothing else.\n
-    //     Print JSON code block please.
-    // ", SCHEMA);
+    let aktion_math_sub: String = format!(
+        "
+        You are a helpful AI assistant!.\n
+        You know which function to use in order to subtract two numbers.\n
+        Output should be in JSON using the schema defined here: {}.\n
+        Just print the JSON and nothing else.\n
+        Print JSON code block please.
+    ",
+        SUB_FUNC_SCHEMA
+    );
+    let aktion_math_sum: String = format!(
+        "
+        You are a helpful AI assistant!.\n
+        You know which function to use in order to add two numbers.\n
+        Output should be in JSON using the schema defined here: {}.\n
+        Just print the JSON and nothing else.\n
+        Print JSON code block please.
+    ",
+        SUM_FUNC_SCHEMA
+    );
 
     let options = GenerationOptions::default().temperature(0.2);
-    let system_message = ChatMessage::system(aktion_system_mock.clone());
+
+    let system_message = ChatMessage::system(aktion_math_asst.clone());
     messages.push(system_message);
+    // let system_message = ChatMessage::system(aktion_math_sum.clone());
+    // messages.push(system_message);
+    // let system_message = ChatMessage::system(aktion_math_sub.clone());
+    // messages.push(system_message);
+
+    // let user_message = ChatMessage::user("create a modelfile".to_string());
+    // messages.push(user_message);
 
     loop {
         stdout.write_all(b"\n> ").await?;
