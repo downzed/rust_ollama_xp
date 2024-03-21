@@ -14,8 +14,8 @@ const C04_DIR: &str = ".c04-data";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // read_embeddings().await?;
-    create_embeddings(&Ollama::default()).await?;
+    read_embeddings().await?;
+    // create_embeddings(&Ollama::default()).await?;
     Ok(())
 }
 
@@ -78,69 +78,12 @@ async fn create_embeddings(ollama: &Ollama) -> Result<()> {
     let txt = read_to_string(Path::new(MOCK_DIR).join("embeddings.txt"))?;
     let chunks: Vec<&str> = txt.split("\n## ").collect();
 
-    let embeddings: Vec<(usize, Vec<f64>)> = Vec::new();
-
     for (i, chunk) in chunks.iter().enumerate() {
         let emb = create_embedding(ollama, chunk.trim()).await?;
         let file_name = format!("c04-embeddings-{:0>2}.be-f64.bin", i);
         let file_path = Path::new(C04_DIR).join(file_name);
-        // save_be_f64(&file_path, &emb)?;
+        save_be_f64(&file_path, &emb)?;
     }
-
-    // let splits = simple_text_splitter(&txt, 500)?;
-
-    // println!(">> [debug: splits counts] {}", splits.len());
-
-    // for (i, (seg, index)) in splits.into_iter().enumerate() {
-    //     println!();
-
-    //     let res = ollama
-    //         .generate_embeddings(EMBEDDING_MODEL.to_string(), seg, None)
-    //         .await?;
-
-    //     let file_name = format!("c04-embeddings-{:0>2}.be-f64.bin", i);
-    //     let file_path = Path::new(C04_DIR).join(file_name);
-
-    //     // Initialize a buffer
-    //     let mut buffer = Vec::new();
-    //     // Serialize the segment index as f64 and append to the buffer
-    //     let index_f64 = index as f64; // Cast usize index to f64
-    //     buffer.extend_from_slice(&index_f64.to_be_bytes());
-
-    //     // Serialize each embedding value as f64 and append to the buffer
-    //     for embedding in res.embeddings.iter() {
-    //         buffer.extend_from_slice(&embedding.to_be_bytes());
-    //     }
-
-    //     // save_be_f32(&file_path, &buffer)?;
-    //     // Write the buffer to the file
-    //     let mut file = File::create(file_path).await?;
-    //     file.write_all(&buffer).await?;
-    //     println!(">> [debug: embeddings] {:?}", res);
-    // }
 
     Ok(())
-}
-
-fn simple_text_splitter(txt: &str) -> Result<Vec<(String, usize)>> {
-    let result = Vec::new();
-
-    // Split the content at each "##" title annotation
-    let chunks: Vec<&str> = txt.split("\n## ").collect();
-
-    // Process each chunk
-    for (index, chunk) in chunks.iter().enumerate() {
-        // Skip the first chunk if it's empty (no content before the first "##")
-        if index == 0 && chunk.is_empty() {
-            continue;
-        }
-
-        // Trim whitespace and process the chunk as needed
-        let processed_chunk = chunk.trim();
-
-        // For demonstration, we're just printing each chunk
-        println!("Chunk {}:\n{}", index, processed_chunk);
-    }
-
-    Ok(result)
 }
